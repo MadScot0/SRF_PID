@@ -1,11 +1,18 @@
-
-public class SRF_PID {
+package org.usfirst.frc.team3826.robot;
+public class SRF_PID { //v1.1
+	/*	Added delta time funcionality
+	 *  Untested
+	 * 
+	 * 
+	 * 
+	 */
 
 	static double kP, kI, kD;
 	static double errorSum = 0, lastError = 0;
 	static double setpoint;
 	static boolean reversed = false;
 	static double max, min;
+	static double lastTime = 0;
 
 	public static void setLimits(double high, double low)
 	{
@@ -37,14 +44,16 @@ public class SRF_PID {
 		setpoint = target;
 	}
 	
-	public static double computePID(double current)
+	public static double computePID(double current, double timeNow)
 	{
 		double output;
 		double error;
+		double dT = timeNow - lastTime;
+		lastTime = timeNow;
 		
 		error = setpoint - current;
 		errorSum+=error;
-		output = (kP * error) + (kI * errorSum) + kD * (error - lastError); //Mo is typically not relevant in current output computation
+		output = (kP * error) + (kI * dT * errorSum) + kD * dT * (error - lastError); //Mo is typically not relevant in current output computation
 		
 		if(reversed)
 			output*=-1;
