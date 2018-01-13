@@ -5,7 +5,14 @@ public class SRF_PID {
 	static double errorSum = 0, lastError = 0;
 	static double setpoint;
 	static boolean reversed = false;
+	static double max, min;
 
+	public static void setLimits(double high, double low)
+	{
+		max = high;
+		min = low;
+	}
+	
 	public static void setReverse(boolean reverse)
 	{
 		reversed = reverse;
@@ -41,6 +48,11 @@ public class SRF_PID {
 		
 		if(reversed)
 			output*=-1;
+		
+		if(output > max)
+			output = max;
+		else if(output < min)
+			output = min;
 		
 		lastError = error; //Go here for math basis
 							//https://library.automationdirect.com/methods-behind-pid-loop-control/
