@@ -14,40 +14,40 @@ public class SRF_PID { //v1.1
 	static double max, min;
 	static double lastTime = 0;
 
-	public static void setLimits(double high, double low)
+	public static void setLimits(double high, double low) //this method sets the output limits for this PID object
 	{
 		max = high;
 		min = low;
 	}
 	
-	public static void setReverse(boolean reverse)
+	public static void setReverse(boolean reverse) //method to reverse output values
 	{
 		reversed = reverse;
 	}
 	
-	public static void setPID(double P, double I, double D)
+	public static void setPID(double P, double I, double D) //method to set values of constants in the PID loop
 	{
 		kP = P;
 		kI = I;
 		kD = D;
 	}
 	
-	public static void adjustPID(double adjustP, double adjustI, double adjustD)
-	{
+	public static void adjustPID(double adjustP, double adjustI, double adjustD) //method so that people can incrementally adjust
+	{									//PID constants
 		kP+=adjustP;
 		kI+=adjustI;
 		kD+=adjustD;
 	}
 	
-	public static void setSetpoint(double target)
-	{
+	public static void setSetpoint(double target) //set the setpoint that the PID will approach; the vagueness allows for many
+	{						//applications (e.g. speed, position, etc.)
 		setpoint = target;
 	}
 	
-	public static double computePID(double current, double timeNow)
-	{
-		double output;
-		double error;
+	public static double computePID(double current, double timeNow) //the method to compute what the output of the PID control should
+	{								//should be, current is the value of the sensor that your setpoint
+		double output;						//is compared to; timeNow just needs to be a refernece to a steady 
+		double error;						//change, DON'T PAUSE THE TIMER
 		double dT = timeNow - lastTime;
 		lastTime = timeNow;
 		
