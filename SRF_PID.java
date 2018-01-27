@@ -53,7 +53,7 @@ public class SRF_PID { //v1.1
 		
 		error = setpoint - current;
 		errorSum+=error;
-		output = (kP * error) + (kI * dT * errorSum) + kD * dT * (error - lastError); //Mo is typically not relevant in current output computation
+		output = (kP * error) + (kI * dT * errorSum) + kD / dT * (error - lastError); //Mo is typically not relevant in current output computation
 		
 		if(reversed)
 			output*=-1;
