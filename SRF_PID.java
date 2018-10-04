@@ -1,50 +1,52 @@
-package org.usfirst.frc.team3826.robot;
-public class SRF_PID { //v1.1
-	/*	Added delta time funcionality
+package SRF_PID;
+
+public class SRF_PID { //v1.1.1
+	/*	Fixed instance overwrite problem
 	 *  Untested
 	 * 
 	 * 
 	 * 
 	 */
+	
+	int P = 1, I = 2, D = 3;
+	double[] k = new double[4];
+	double errorSum = 0, lastError = 0;
+	double setpoint;
+	boolean reversed = false;
+	double max = 1, min = -1;
+	double lastTime = 0;
 
-	static double kP, kI, kD;
-	static double errorSum = 0, lastError = 0;
-	static double setpoint;
-	static boolean reversed = false;
-	static double max = 1, min = -1;
-	static double lastTime = 0;
-
-	public static void setLimits(double high, double low)
+	public void setLimits(double high, double low)
 	{
 		max = high;
 		min = low;
 	}
 	
-	public static void setReverse(boolean reverse)
+	public void setReverse(boolean reverse)
 	{
 		reversed = reverse;
 	}
 	
-	public static void setPID(double P, double I, double D)
+	public void setPID(double nP, double nI, double nD)
 	{
-		kP = P;
-		kI = I;
-		kD = D;
+		k[P] = nP;
+		k[I] = nI;
+		k[D] = nD;
 	}
 	
-	public static void adjustPID(double adjustP, double adjustI, double adjustD)
+	public void adjustPID(double adjustP, double adjustI, double adjustD)
 	{
-		kP+=adjustP;
-		kI+=adjustI;
-		kD+=adjustD;
+		k[P]+=adjustP;
+		k[I]+=adjustI;
+		k[D]+=adjustD;
 	}
 	
-	public static void setSetpoint(double target)
+	public void setSetpoint(double target)
 	{
 		setpoint = target;
 	}
 	
-	public static double computePID(double current, double timeNow)
+	public double computePID(double current, double timeNow)
 	{
 		double output;
 		double error;
@@ -58,9 +60,9 @@ public class SRF_PID { //v1.1
 		errorSum+=error;
 		//System.out.println("("+kP+"*"+error+")+("+kI+"*"+dT+"*"+errorSum+")+"+kD+"/"+dT+"*("+error+"-"+lastError+")");
 		if(dT != 0)
-			output = (kP * error) + (kI * dT * errorSum) + kD / dT * (error - lastError); //Mo is typically not relevant in current output computation
+			output = (k[P] * error) + (k[I] * dT * errorSum) + k[D] / dT * (error - lastError); //Mo is typically not relevant in current output computation
 		else
-			output = (kP * error) + (kI * dT * errorSum);
+			output = (k[P] * error) + (k[I] * dT * errorSum);
 		
 		
 		if(reversed)
@@ -75,4 +77,8 @@ public class SRF_PID { //v1.1
 							//https://library.automationdirect.com/methods-behind-pid-loop-control/
 		return output;
 	}
+	
+	//percent Adjustment - has gain as a parameter
+	
+	//undo - require que of previous adjustments
 }
