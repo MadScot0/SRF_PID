@@ -79,6 +79,12 @@ public class SRF_PID { //v1.1.1
 	}
 	
 	//percent Adjustment - has gain as a parameter
-	
+	/*
+	 * varType - which variable(P,I, or D) to adjust, where P = 1, I = 2, D = 3
+	 * percent - by what percent you are mulitplying the the variable
+	 */
+	public void adjustPIDValues(int varType, double percent) {
+		
+		
+	}
 	//undo - require que of previous adjustments
-}
