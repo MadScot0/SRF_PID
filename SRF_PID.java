@@ -1,4 +1,6 @@
-package SRF_PID;
+//package SRF_PID;
+
+import edu.wpi.first.wpilibj.Joystick;
 
 public class SRF_PID { //v1.1.1
 	/*	Fixed instance overwrite problem
@@ -8,14 +10,22 @@ public class SRF_PID { //v1.1.1
 	 * 
 	 */
 	
-	int P = 1, I = 2, D = 3;
-	double[] k = new double[4];
+	public SRF_PID(Joystick trollPID) {
+		
+	}
+	
+	int P = 0, I = 1, D = 2;
+	double[] k = new double[3];
 	double errorSum = 0, lastError = 0;
 	double setpoint;
 	boolean reversed = false;
 	double max = 1, min = -1;
 	double lastTime = 0;
 
+	double[] initialK = new double[3];
+	double[] mult = new double[] {1,1,1};
+	
+	
 	public void setLimits(double high, double low)
 	{
 		max = high;
@@ -27,18 +37,30 @@ public class SRF_PID { //v1.1.1
 		reversed = reverse;
 	}
 	
-	public void setPID(double nP, double nI, double nD)
+	public void setPID(double nP, double nI, double nD, boolean init)
 	{
 		k[P] = nP;
 		k[I] = nI;
 		k[D] = nD;
+		
+		if(init){
+			initialK[P] = nP;
+			initialK[I] = nI;
+			initialK[D] = nD;
+		}
 	}
 	
-	public void adjustPID(double adjustP, double adjustI, double adjustD)
+	public void adjustPID(double adjustP, double adjustI, double adjustD, boolean init)
 	{
 		k[P]+=adjustP;
 		k[I]+=adjustI;
 		k[D]+=adjustD;
+		
+		if(init){
+			initialK[P]+=adjustP;
+			initialK[I]+=adjustI;
+			initialK[D]+=adjustD;
+		}
 	}
 	
 	public void setSetpoint(double target)
@@ -78,13 +100,20 @@ public class SRF_PID { //v1.1.1
 		return output;
 	}
 	
-	//percent Adjustment - has gain as a parameter
-	/*
-	 * varType - which variable(P,I, or D) to adjust, where P = 1, I = 2, D = 3
-	 * percent - by what percent you are mulitplying the the variable
-	 */
-	public void adjustPIDValues(int varType, double percent) {
-		
-		
+	public void setMult(double nP, double nI, double nD)
+	{
+		mult[P] = nP;
+		mult[I] = nI;
+		mult[D] = nD;
 	}
-	//undo - require que of previous adjustments
+	
+	public void adjustMult(double adjustP, double adjustI, double adjustD)
+	{
+		mult[P]+=adjustP;
+		mult[I]+=adjustI;
+		mult[D]+=adjustD;
+	}
+	
+	
+	
+}
