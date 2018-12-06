@@ -27,27 +27,29 @@ public class SRF_PID { //v1.1.1
 	double max = 1, min = -1;
 	double lastTime = 0;
 
-	double[] initialK = new double[3];
+	double[] = new double[3];
 	double[] mult = new double[] {1,1,1};
 	
+	final int storable = 3;//the variable that defines undo array sizes
 	//this will soon serve as the cache of old values (up to 3 in the past)
 	//the first value specifies which gain is being modified and the second denotes how many steps previous it was
 	//0 is the previous value and then it counts up from there
 	double[][] oldK = new double[3][3];
 	
-	//this is an array which stores how many 
-	int[] stored = new int[3];
-	stored[0] = -1;
-	stored[1] = -1;
-	stored[2] = -1;
+	//this is an array which stores which cell was most recently written to in each previous value cache
+	//-1 is the default value for each array and signals that it hasn't been used yet
+	int[] mostRecent = new int[3];
+	mostRecent[P] = -1;
+	mostRecent[I] = -1;
+	mostRecent[D] = -1;
 	
 	
 	//these values need to be edited to the desired default values
 	//they represent the index of the axis or whatever you're calling (e.g. control.getRawAxis(joyX))
-	int  joyX, joyY;
+	int  joyX = 1, joyY = 2;
 	boolean reverseX = false, reverseY = false; //these will invert their respective joystick axes
-	int  applyButton, cycleGainButton, undoButton, cycleModeButton; //cycle mode toggles between set, adjust and multiply(0,1,& 2)
-	int currentMode = 0;//the mode that is changed by the cycleMode Button
+	int  applyButton = 1, cycleGainButton = 2, undoButton = 3, cycleModeButton = 4; //cycle mode toggles between set, adjust and multiply(0,1,& 2)
+	int currentMode = 0;//the mode that is changed by the cycleMode Button (set = 0, adjust = 1, multiply = 2)
 	int currentGain = 0;
 	
 	//these booleans become false when their respective button is pressed and remain so until it is realeased
@@ -59,20 +61,7 @@ public class SRF_PID { //v1.1.1
 	//a method that will manage the cache of previous changes
 	public void updateUndo(int gain, double val)
 	{
-		//if the cache is empty then no shuffling of data is required
-		if(stored[gain] == -1)
-		{
-			stored[gain] = 0;
-			oldK[gain][0] = val;
-			return;
-		}
-		//otherwise loop and rewrite starting with 1
-		
-		
-		
-			= stored[gain]
-		
-			
+		//circular arrays
 	}
 	
 	
@@ -197,6 +186,8 @@ public class SRF_PID { //v1.1.1
 		if(j.getRawButton(cycleGainButton) && letUpCycleGain)
 		{
 			currentGain += 1;
+			if(currentGain == 3)
+				currentGain = 0;
 			letUpCycleGain = false;
 		}
 		else if(!j.getRawButton(cycleGainButton))
@@ -207,6 +198,8 @@ public class SRF_PID { //v1.1.1
 		if(j.getRawButton(cycleModeButton) && letUpCycleMode)
 		{
 			currentMode += 1;
+			if(currentMode == 3)
+				currentMode = 0;
 			letUpCycleMode = false;
 		}
 		else if(!j.getRawButton(cycleModeButton))
