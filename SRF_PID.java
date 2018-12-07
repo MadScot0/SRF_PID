@@ -37,11 +37,13 @@ public class SRF_PID { //v1.1.1
 	double[][] oldK = new double[3][3];
 	
 	//this is an array which stores which cell was most recently written to in each previous value cache
+	//this most recent value represents the current value of the respective gain
 	//-1 is the default value for each array and signals that it hasn't been used yet
-	int[] mostRecent = new int[3];
-	mostRecent[P] = -1;
-	mostRecent[I] = -1;
-	mostRecent[D] = -1;
+	int[] mostRecent = {-1,-1,-1};
+	
+	//this array stores how many steps back you've gone (using this value will give us the ability to easily incorpoarate redo later on
+	//a value of 0 means that this gain hasn't been undone since the code was adjusted
+	int[] mostRecentUndo {0,0,0}
 	
 	
 	//these values need to be edited to the desired default values
@@ -62,6 +64,15 @@ public class SRF_PID { //v1.1.1
 	public void updateUndo(int gain, double val)
 	{
 		//circular arrays
+		int tempIndex = mostRecent[gain]-mostRecentUndo[gain]+1; //the value that stores the cell that the new value is being written to in the cache
+		
+		//reduce it to keep it with in the index of the array
+		while(tempIndex > 2)
+			tempIndex-=3;
+		
+		oldK[gain][tempIndex] = val;
+		mostRecent = tempIndex;
+		mostRecentUndo = -1;//it defines that there are no recent undos and begins to overwrite the old values
 	}
 	
 	
@@ -80,6 +91,13 @@ public class SRF_PID { //v1.1.1
 		reversed = reverse;
 	}
 	
+	//sets a specific gain
+	public void setGain(int gain, double value)
+	{
+		k[gain] = value;
+	}
+	
+	//sets the value of all three gains
 	public void setPID(double nP, double nI, double nD, boolean init)
 	{
 		
@@ -94,6 +112,7 @@ public class SRF_PID { //v1.1.1
 		}
 	}
 	
+	//adds or subtracts to all three gains
 	public void adjustPID(double adjustP, double adjustI, double adjustD, boolean init)
 	{
 		k[P]+=adjustP;
@@ -182,6 +201,8 @@ public class SRF_PID { //v1.1.1
 	//This method should be called in every loop as it is what updates these methods
 	public void controlPID()
 	{
+		//each of the button must be physically released before their code can trigger again
+		
 		//cycleGain
 		if(j.getRawButton(cycleGainButton) && letUpCycleGain)
 		{
@@ -205,12 +226,24 @@ public class SRF_PID { //v1.1.1
 		else if(!j.getRawButton(cycleModeButton))
 			letUpCycleMode = true;
 		
+		
 		//undo
-		
-		
+		//this will only trigger if you have updated a value for this gain
+		//it also limits undos so that you can't make a full loop
+		if(j.getRawButton(undoButton) && letUpUndo && mostRecent[currentGain] > -1 && mostRecentUndo[currentGain] < storable - 1)
+		{
+			mostRecentUndo[currentGain]++;//sets the value to the one that has most recently been written to minus the number
+							//of consecutive undos
+			setValue(currentGain, oldK[currentGain][mostRecent[currentGain]-mostRecentUndo[currentGain]]);
+		}
+			
+			
 		//joystick
 		
 		
-		//apply
+		//apply - applies value right and then updateUndo is called
+		
+		
+		//preset adjustments - ADD MORE BUTTONS FOR THIS - also it requires update undo after the update is applied
 	}
 }
