@@ -58,7 +58,7 @@ public class SRF_PID { //v1.1.1
 	int  applyButton = 1, cycleGainButton = 2, undoButton = 3, cycleModeButton = 4; //cycle mode toggles between set, adjust and multiply(0,1,& 2)
 	int preset10Button = 5, preset50Button = 6, preset100Button = 7, inversePresetButton = 8; //preset buttons which change mult values by plus or minus the number on the end, inverse switches the sign of the preset (*1 or *-1)
 	int currentMode = 0;//the mode that is changed by the cycleMode Button (set = 0, adjust = 1, multiply = 2)
-	int currentGain = 0;
+	int currentGain = 0;//The gain that is changed by the cycleGain Button (ie. P, I, or D)
 	
 	//these booleans become false when their respective button is pressed and remain so until it is realeased
 	//this means that rather then making a change for the entire duration you
@@ -237,17 +237,8 @@ public class SRF_PID { //v1.1.1
 		
 		
 		//apply - applies value right and then updateUndo is called (Dial + presets)
-		//Should we only be able to apply changes to one gain at a time?
-		//This is written on the assumption that we can change multiple values at a time, then hit apply.
-		//Note to above line - mostly because if we can only change one value at a time why is mult an array? Also if we
-		//are going to do this we should cahnge updateUndo to do all three at once
 		if(j.getRawButton(applyButton) && letUpApply) {
-			k[P] *= mult[P];
-			k[I] *= mult[I];
-			k[D] *= mult[D];
-			updateUndo(P,k[P]);
-			updateUndo(I,k[I]);
-			updateUndo(D,k[D]);
+			k[currentGain] *= mult[currentGain];
 		}
 		
 		//preset adjustments - ADD MORE BUTTONS FOR THIS - also it requires update undo after the update is applied
