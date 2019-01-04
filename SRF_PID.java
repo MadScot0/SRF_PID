@@ -14,7 +14,9 @@ public class SRF_PID { //v1.1.1
 	 *
 	 *  Also consider adding redo functionality
 	 *  
-	 *  CHECK NOTES above apply in ControlPID()
+	 *  What should be called instead of setValues() in undo of controlPID() as setValues no longer exists?
+	 *  
+	 *  Test Dial
 	 */
 	
 	public SRF_PID(Joystick js) {
@@ -32,7 +34,6 @@ public class SRF_PID { //v1.1.1
 	double lastTime = 0;
 	int inverser = 1; //Preset multiplied by this to switch between adding and subtracting
 
-	double[] = new double[3];
 	double[] mult = new double[] {1,1,1};
 	
 	final int storable = 3;//the variable that defines undo array sizes
@@ -48,7 +49,7 @@ public class SRF_PID { //v1.1.1
 	
 	//this array stores how many steps back you've gone (using this value will give us the ability to easily incorpoarate redo later on
 	//a value of 0 means that this gain hasn't been undone since the code was adjusted
-	int[] mostRecentUndo {0,0,0}
+	int[] mostRecentUndo = {0,0,0};
 	
 	
 	//these values need to be edited to the desired default values
@@ -65,6 +66,16 @@ public class SRF_PID { //v1.1.1
 	//hold a given button, you only make a single change when it is first pressed
 	boolean letUpApply = true, letUpCycleGain = true, letUpUndo = true, letUpCycleMode = true, letUpPreset10 = true, letUpPreset50 = true, letUpPreset100 = true, letUpInversePreset = true;
 	
+	//Dial variables
+	double slope,xCoor,yCoor,finDegree;	//slope or hypotenuse of angle Theta in unit circle,
+									//X-Coordinate of intersection of the line created by the hypotenuse of angel theta and unit circle,
+									//y-Coordinate of intersection of the line created by the hypotenuse of angel theta and unit circle,
+									//Starts as the Arcsine or inverse sine of yCoor then becomes the final angle in degrees and finally the percentage based on the angle in degrees
+	float dead = .25f;		//Size of dead band around joystick    range: 0-1
+	int stickRotations = 0;	//The number of times the stick as completed a full rotation 
+	int lastQuadrant;		//last quadrant of the unit circle the stick was in, Arranged like this: 	2 | 1
+	int currentQuadrant;	//The Current quadrant the stick is in									   ---|---
+							//																			3 | 4
 	
 	//a method that will manage the cache of previous changes
 	public void updateUndo(int gain, double val)
@@ -228,13 +239,60 @@ public class SRF_PID { //v1.1.1
 		if(j.getRawButton(undoButton) && letUpUndo && mostRecent[currentGain] > -1 && mostRecentUndo[currentGain] < storable - 1)
 		{
 			mostRecentUndo[currentGain]++;//sets the value to the one that has most recently been written to minus the number
-							//of consecutive undos
+										  //of consecutive undos
 			setValue(currentGain, oldK[currentGain][mostRecent[currentGain]-mostRecentUndo[currentGain]]);
 		}
 			
 			
 		//joystick (Dial)
-		
+		int axisy = 0;	//I have no idea what the axis number is so im putting this in as a place holder(Replace all) and so it can be changed quickly
+		int axisx = 1;	//same as above
+		if(j.getRawAxis(axisx) > dead || j.getRawAxis(axisx) < dead*-1 || j.getRawAxis(axisy) > dead || j.getRawAxis(axisy) < dead*-1) {
+			
+			//This converts any point that doesn't fall on the border of the unit Circle into a point on it by finding
+			//the intersection of the hypotenuse of the angle created and the circle
+			if(j.getRawAxis(axisx) == 0 && j.getRawAxis(axisy) > 0 ) {
+				xCoor = 0;
+				yCoor = 1;
+			} else if(j.getRawAxis(axisx) == 0 && j.getRawAxis(axisy) < 0 ) {
+				xCoor = 0;
+				yCoor = -1;
+			} else {
+				slope = j.getRawAxis(axisy)/j.getRawAxis(axisx);
+				xCoor = 1/(Math.sqrt(Math.pow(slope,2) + 1));
+				yCoor = xCoor * slope;
+			}
+			//finds angle in degrees using yCoor
+			finDegree = Math.toDegrees(Math.asin(yCoor));
+			
+			//determines what quadrant the stick is in
+			currentQuadrant = 1;
+			if(finDegree > 0 && xCoor < 0) {
+				finDegree += 2*(90-finDegree);
+				currentQuadrant = 2;
+			} else if(finDegree < 0 && xCoor <0) {
+				finDegree = 180 + finDegree*-1;
+				currentQuadrant = 3;
+			} else if(finDegree < 0) {
+				finDegree = 360+finDegree;
+				currentQuadrant = 4;
+			}
+			//updates stickRotations
+			if(lastQuadrant == 1 && currentQuadrant == 2)
+				stickRotations--;
+			else if(lastQuadrant == 2 && currentQuadrant == 1)
+				stickRotations++;
+			lastQuadrant = currentQuadrant;
+			
+			//changes finDegree from degrees to the final percentage
+			if(stickRotations >= 0)
+				finDegree = finDegree/3.6 + 100*stickRotations;
+			else
+				finDegree /= 3.6*stickRotations*-1;
+			
+		} else if(lastQuadrant != 0) {
+			lastQuadrant = 0;
+		}
 		
 		//apply - applies value right and then updateUndo is called (Dial + presets)
 		if(j.getRawButton(applyButton) && letUpApply) {
@@ -257,6 +315,5 @@ public class SRF_PID { //v1.1.1
 		if(j.getRawButton(preset100Button) && letUpPreset100) {
 			mult[currentGain] += 1 * inverser;
 		}
-		
 	}
 }
