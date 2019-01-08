@@ -1,6 +1,9 @@
+package org.usfirst.frc.team3826.robot;
+
 //package SRF_PID;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SRF_PID { //v1.1.1
 	/*	Fixed instance overwrite problem
@@ -240,25 +243,25 @@ public class SRF_PID { //v1.1.1
 		{
 			mostRecentUndo[currentGain]++;//sets the value to the one that has most recently been written to minus the number
 										  //of consecutive undos
-			setValue(currentGain, oldK[currentGain][mostRecent[currentGain]-mostRecentUndo[currentGain]]);
+			setGain(currentGain, oldK[currentGain][mostRecent[currentGain]-mostRecentUndo[currentGain]]);
 		}
 			
 			
 		//joystick (Dial)
-		int axisy = 0;	//I have no idea what the axis number is so im putting this in as a place holder(Replace all) and so it can be changed quickly
-		int axisx = 1;	//same as above
+		int axisy = 1;	//I have no idea what the axis number is so im putting this in as a place holder(Replace all) and so it can be changed quickly
+		int axisx = 0;	//same as above
 		if(j.getRawAxis(axisx) > dead || j.getRawAxis(axisx) < dead*-1 || j.getRawAxis(axisy) > dead || j.getRawAxis(axisy) < dead*-1) {
 			
 			//This converts any point that doesn't fall on the border of the unit Circle into a point on it by finding
 			//the intersection of the hypotenuse of the angle created and the circle
-			if(j.getRawAxis(axisx) == 0 && j.getRawAxis(axisy) > 0 ) {
+			if(j.getRawAxis(axisx) == 0 && -j.getRawAxis(axisy) > 0 ) {
 				xCoor = 0;
 				yCoor = 1;
-			} else if(j.getRawAxis(axisx) == 0 && j.getRawAxis(axisy) < 0 ) {
+			} else if(j.getRawAxis(axisx) == 0 && -j.getRawAxis(axisy) < 0 ) {
 				xCoor = 0;
 				yCoor = -1;
 			} else {
-				slope = j.getRawAxis(axisy)/j.getRawAxis(axisx);
+				slope = (-j.getRawAxis(axisy))/j.getRawAxis(axisx);
 				xCoor = 1/(Math.sqrt(Math.pow(slope,2) + 1));
 				yCoor = xCoor * slope;
 			}
