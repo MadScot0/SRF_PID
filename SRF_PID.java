@@ -1,6 +1,6 @@
-//package org.usfirst.frc.team3826.robot;
+package org.usfirst.frc.team3826.robot;
 
-package SRF_PID;
+//package SRF_PID;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -79,7 +79,7 @@ public class SRF_PID { //v1.1.1
 	int lastQuadrant;		//last quadrant of the unit circle the stick was in, Arranged like this: 	2 | 1
 	int currentQuadrant;	//The Current quadrant the stick is in									   ---|---
 							//																			3 | 4
-	
+	double dg;
 	//a method that will manage the cache of previous changes
 	public void updateUndo(int gain, double val)
 	{
@@ -264,19 +264,20 @@ public class SRF_PID { //v1.1.1
 				slope = (-j.getRawAxis(axisy))/j.getRawAxis(axisx);
 				xCoor = 1/(Math.sqrt(Math.pow(slope,2) + 1));
 				yCoor = xCoor * slope;
+				xCoor = j.getRawAxis(0);
 			}
 			//finds angle in degrees using yCoor
 			finDegree = Math.toDegrees(Math.asin(yCoor));
-			
+			dg = finDegree;
 			//determines what quadrant the stick is in
 			if (finDegree > 0 && xCoor > 0) {
 				finDegree +=  270;
 				currentQuadrant = 1;
-			}else if(finDegree > 0 && xCoor < 0) {
-				finDegree = (90-finDegree);
+			}else if(finDegree < 0 && xCoor < 0) {
+				finDegree = (90+finDegree);
 				currentQuadrant = 2;
-			} else if(finDegree < 0 && xCoor <0) {
-				finDegree = 90 + finDegree*-1;
+			} else if(finDegree > 0 && xCoor <0) {
+				finDegree = 90 + finDegree;
 				currentQuadrant = 3;
 			} else if(finDegree < 0) {
 				finDegree = 270 + finDegree;
@@ -284,9 +285,9 @@ public class SRF_PID { //v1.1.1
 			}
 			//updates stickRotations
 			if(lastQuadrant == 1 && currentQuadrant == 2)
-				stickRotations--;
-			else if(lastQuadrant == 2 && currentQuadrant == 1)
 				stickRotations++;
+			else if(lastQuadrant == 2 && currentQuadrant == 1)
+				stickRotations--;
 			lastQuadrant = currentQuadrant;
 			
 			//changes finDegree from degrees to the final percentage
