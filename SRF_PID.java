@@ -1,6 +1,6 @@
-package org.usfirst.frc.team3826.robot;
+//package org.usfirst.frc.team3826.robot;
 
-//package SRF_PID;
+package SRF_PID;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -269,15 +269,17 @@ public class SRF_PID { //v1.1.1
 			finDegree = Math.toDegrees(Math.asin(yCoor));
 			
 			//determines what quadrant the stick is in
-			currentQuadrant = 1;
-			if(finDegree > 0 && xCoor < 0) {
-				finDegree += 2*(90-finDegree);
+			if (finDegree > 0 && xCoor > 0) {
+				finDegree +=  270;
+				currentQuadrant = 1;
+			}else if(finDegree > 0 && xCoor < 0) {
+				finDegree = (90-finDegree);
 				currentQuadrant = 2;
 			} else if(finDegree < 0 && xCoor <0) {
-				finDegree = 180 + finDegree*-1;
+				finDegree = 90 + finDegree*-1;
 				currentQuadrant = 3;
 			} else if(finDegree < 0) {
-				finDegree = 360+finDegree;
+				finDegree = 270 + finDegree;
 				currentQuadrant = 4;
 			}
 			//updates stickRotations
