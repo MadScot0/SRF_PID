@@ -294,7 +294,7 @@ public class SRF_PID { //v1.1.1
 			if(stickRotations >= 0)
 				finDegree = finDegree/3.6 + 100*stickRotations;
 			else
-				finDegree /= 3.6*stickRotations*-1;
+				finDegree /= 3.6*Math.pow(10,stickRotations*-1);
 			
 		} else if(lastQuadrant != 0) {
 			lastQuadrant = 0;
