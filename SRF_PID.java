@@ -3,6 +3,7 @@ package org.usfirst.frc.team3826.robot;
 //package SRF_PID;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SRF_PID { //v1.1.1
@@ -67,7 +68,7 @@ public class SRF_PID { //v1.1.1
 	//these booleans become false when their respective button is pressed and remain so until it is realeased
 	//this means that rather then making a change for the entire duration you
 	//hold a given button, you only make a single change when it is first pressed
-	boolean letUpApply = true, letUpCycleGain = true, letUpUndo = true, letUpCycleMode = true, letUpPreset10 = true, letUpPreset50 = true, letUpPreset100 = true, letUpInversePreset = true; letUpClearMult
+	boolean letUpApply = true, letUpCycleGain = true, letUpUndo = true, letUpCycleMode = true, letUpPreset10 = true, letUpPreset50 = true, letUpPreset100 = true, letUpInversePreset = true, letUpClearMult = true;
 	
 	//Dial variables
 	double slope,xCoor,yCoor,finDegree;	//slope or hypotenuse of angle Theta in unit circle,
@@ -83,6 +84,7 @@ public class SRF_PID { //v1.1.1
 	//a method that will manage the cache of previous changes
 	public void updateUndo(int gain, double val)
 	{
+		mostRecent[gain]++;
 		//circular arrays
 		int tempIndex = mostRecent[gain]-mostRecentUndo[gain]; //the value that stores the cell that the new value is being written to in the cache
 		
@@ -90,6 +92,9 @@ public class SRF_PID { //v1.1.1
 		while(tempIndex > 2)
 			tempIndex-=3;
 		
+		SmartDashboard.putNumber("PID Gain",val);
+		SmartDashboard.putNumber("CurrentGain",gain);
+		Timer.delay(1);
 		oldK[gain][tempIndex] = val;
 		mostRecent[gain] = tempIndex;
 		mostRecentUndo[gain] = -1;//it defines that there are no recent undos and begins to overwrite the old values
@@ -305,8 +310,14 @@ public class SRF_PID { //v1.1.1
 		//apply - applies value right and then updateUndo is called (Dial + presets)
 		if(j.getRawButton(applyButton) && letUpApply) {
 			k[currentGain] *= mult[currentGain];
-			updateUndo();
+			
+			updateUndo(currentGain,k[currentGain]);
+			letUpApply = false;
 		}
+		
+		//if(!j.) {
+			
+		//}
 		
 		//Clears the value in the currently selected gains place in mult[] - Right Stick button
 		if(j.getRawButton(10) && letUpClearMult) {
