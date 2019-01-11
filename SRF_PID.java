@@ -59,7 +59,7 @@ public class SRF_PID { //v1.1.1
 	//they represent the index of the axis or whatever you're calling (e.g. control.getRawAxis(joyX))
 	int  joyX = 1, joyY = 2;
 	boolean reverseX = false, reverseY = false; //these will invert their respective joystick axes
-	int  applyButton = 1, cycleGainButton = 2, undoButton = 3, cycleModeButton = 4; //cycle mode toggles between set, adjust and multiply(0,1,& 2)
+	int  applyButton = 1, cycleGainButton = 2, undoButton = 3, cycleModeButton = 4, multClearButton = 10;//cycle mode toggles between set, adjust and multiply(0,1,& 2)
 	int preset10Button = 5, preset50Button = 6, preset100Button = 7, inversePresetButton = 8; //preset buttons which change mult values by plus or minus the number on the end, inverse switches the sign of the preset (*1 or *-1)
 	int currentMode = 0;//the mode that is changed by the cycleMode Button (set = 0, adjust = 1, multiply = 2)
 	int currentGain = 0;//The gain that is changed by the cycleGain Button (ie. P, I, or D)
@@ -67,7 +67,7 @@ public class SRF_PID { //v1.1.1
 	//these booleans become false when their respective button is pressed and remain so until it is realeased
 	//this means that rather then making a change for the entire duration you
 	//hold a given button, you only make a single change when it is first pressed
-	boolean letUpApply = true, letUpCycleGain = true, letUpUndo = true, letUpCycleMode = true, letUpPreset10 = true, letUpPreset50 = true, letUpPreset100 = true, letUpInversePreset = true;
+	boolean letUpApply = true, letUpCycleGain = true, letUpUndo = true, letUpCycleMode = true, letUpPreset10 = true, letUpPreset50 = true, letUpPreset100 = true, letUpInversePreset = true; letUpClearMult
 	
 	//Dial variables
 	double slope,xCoor,yCoor,finDegree;	//slope or hypotenuse of angle Theta in unit circle,
@@ -247,7 +247,7 @@ public class SRF_PID { //v1.1.1
 		}
 			
 			
-		//joystick (Dial)
+		//joystick (Dial) - Left Stick
 		int axisy = 1;	//I have no idea what the axis number is so im putting this in as a place holder(Replace all) and so it can be changed quickly
 		int axisx = 0;	//same as above
 		if(j.getRawAxis(axisx) > dead || j.getRawAxis(axisx) < dead*-1 || j.getRawAxis(axisy) > dead || j.getRawAxis(axisy) < dead*-1) {
@@ -296,6 +296,8 @@ public class SRF_PID { //v1.1.1
 			else
 				finDegree /= 3.6*Math.pow(10,stickRotations*-1);
 			
+			mult[currentGain] = finDegree/100;
+			
 		} else if(lastQuadrant != 0) {
 			lastQuadrant = 0;
 		}
@@ -303,6 +305,12 @@ public class SRF_PID { //v1.1.1
 		//apply - applies value right and then updateUndo is called (Dial + presets)
 		if(j.getRawButton(applyButton) && letUpApply) {
 			k[currentGain] *= mult[currentGain];
+			updateUndo();
+		}
+		
+		//Clears the value in the currently selected gains place in mult[] - Right Stick button
+		if(j.getRawButton(10) && letUpClearMult) {
+			mult[currentGain] = 0;	
 		}
 		
 		//preset adjustments - ADD MORE BUTTONS FOR THIS - also it requires update undo after the update is applied
