@@ -92,9 +92,6 @@ public class SRF_PID { //v1.1.1
 		while(tempIndex > 2)
 			tempIndex-=3;
 		
-		SmartDashboard.putNumber("PID Gain",val);
-		SmartDashboard.putNumber("CurrentGain",gain);
-		Timer.delay(1);
 		oldK[gain][tempIndex] = val;
 		mostRecent[gain] = tempIndex;
 		mostRecentUndo[gain] = -1;//it defines that there are no recent undos and begins to overwrite the old values
@@ -249,6 +246,9 @@ public class SRF_PID { //v1.1.1
 			mostRecentUndo[currentGain]++;//sets the value to the one that has most recently been written to minus the number
 										  //of consecutive undos
 			setGain(currentGain, oldK[currentGain][mostRecent[currentGain]-mostRecentUndo[currentGain]]);
+			letUpUndo = false;
+		} else if(!j.getRawButton(undoButton)) {
+			letUpUndo = true;
 		}
 			
 			
@@ -310,35 +310,47 @@ public class SRF_PID { //v1.1.1
 		//apply - applies value right and then updateUndo is called (Dial + presets)
 		if(j.getRawButton(applyButton) && letUpApply) {
 			k[currentGain] *= mult[currentGain];
-			
 			updateUndo(currentGain,k[currentGain]);
 			letUpApply = false;
+		} else if(!j.getRawButton(applyButton)) {
+			letUpApply = true;
 		}
 		
-		//if(!j.) {
-			
-		//}
-		
 		//Clears the value in the currently selected gains place in mult[] - Right Stick button
-		if(j.getRawButton(10) && letUpClearMult) {
+		if(j.getRawButton(multClearButton) && letUpClearMult) {
 			mult[currentGain] = 0;	
+			letUpClearMult = false;
+		} else if(!j.getRawButton(multClearButton)) {
+			letUpClearMult = true;
 		}
 		
 		//preset adjustments - ADD MORE BUTTONS FOR THIS - also it requires update undo after the update is applied
 		if(j.getRawButton(inversePresetButton) && letUpInversePreset) {
 			inverser *= -1;
+			letUpInversePreset = false;
+		} else if(!j.getRawButton(inversePresetButton)) {
+			letUpInversePreset = true;
 		}
 		
 		if(j.getRawButton(preset10Button) && letUpPreset10) {
 			mult[currentGain] += .1 * inverser;
+			letUpPreset10 = false;
+		} else if(!j.getRawButton(preset10Button)) {
+			letUpPreset10 = true;
 		}
 		
 		if(j.getRawButton(preset50Button) && letUpPreset50) {
 			mult[currentGain] += .5 * inverser;
+			letUpPreset50 = false;
+		} else if(!j.getRawButton(preset50Button)) {
+			letUpPreset50 = true;
 		}
 		
 		if(j.getRawButton(preset100Button) && letUpPreset100) {
 			mult[currentGain] += 1 * inverser;
+			letUpPreset100 = false;
+		} else if(!j.getRawButton(preset100Button)) {
+			letUpPreset100 = true;
 		}
 	}
 }
