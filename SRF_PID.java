@@ -1,5 +1,5 @@
-package org.usfirst.frc.team3826.robot;
-
+///package org.usfirst.frc.team3826.robot;
+package frc.robot;
 //package SRF_PID;
 
 import edu.wpi.first.wpilibj.Joystick;
@@ -23,8 +23,11 @@ public class SRF_PID { //v1.1.1
 	 *  Test Dial
 	 */
 	
-	public SRF_PID(Joystick js) {
+	public SRF_PID(Joystick js, double kP, double kI, double kD) {
 		j = js;
+		oldK[P][0] = kP;
+		oldK[I][0] = kI;
+		oldK[D][0] = kD;
 	}
 	
 	Joystick j;
@@ -49,7 +52,8 @@ public class SRF_PID { //v1.1.1
 	//this is an array which stores which cell was most recently written to in each previous value cache
 	//this most recent value represents the current value of the respective gain
 	//-1 is the default value for each array and signals that it hasn't been used yet
-	int[] mostRecent = {-1,-1,-1};
+	int[] mostRecent = {0,0,0};
+	boolean[] isUpdated = {false,false,false};
 	
 	//this array stores how many steps back you've gone (using this value will give us the ability to easily incorpoarate redo later on
 	//a value of 0 means that this gain hasn't been undone since the code was adjusted
@@ -94,7 +98,8 @@ public class SRF_PID { //v1.1.1
 		
 		oldK[gain][tempIndex] = val;
 		mostRecent[gain] = tempIndex;
-		mostRecentUndo[gain] = -1;//it defines that there are no recent undos and begins to overwrite the old values
+		mostRecentUndo[gain] = 0;//it defines that there are no recent undos and begins to overwrite the old values
+			//this was -1 but I'm pretty sure it should be 0
 	}
 	
 	
@@ -122,11 +127,9 @@ public class SRF_PID { //v1.1.1
 	//sets the value of all three gains
 	public void setPID(double nP, double nI, double nD)
 	{
-		
 		k[P] = nP;
 		k[I] = nI;
-		k[D] = nD;
-		
+		k[D] = nD;		
 	}
 	
 	//adds or subtracts to all three gains
@@ -241,7 +244,7 @@ public class SRF_PID { //v1.1.1
 		//undo
 		//this will only trigger if you have updated a value for this gain
 		//it also limits undos so that you can't make a full loop
-		if(j.getRawButton(undoButton) && letUpUndo && mostRecent[currentGain] > -1 && mostRecentUndo[currentGain] < storable - 1)
+		if(j.getRawButton(undoButton) && letUpUndo && isUpdated[currentGain] && mostRecentUndo[currentGain] < storable - 1)
 		{
 			mostRecentUndo[currentGain]++;//sets the value to the one that has most recently been written to minus the number
 										  //of consecutive undos
@@ -309,6 +312,7 @@ public class SRF_PID { //v1.1.1
 		
 		//apply - applies value right and then updateUndo is called (Dial + presets)
 		if(j.getRawButton(applyButton) && letUpApply) {
+			isUpdated[currentGain] = true;
 			k[currentGain] *= mult[currentGain];
 			updateUndo(currentGain,k[currentGain]);
 			letUpApply = false;
