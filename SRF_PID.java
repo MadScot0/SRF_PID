@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class SRF_PID { //v1.1.1
+public class SRF_PID { //v1.1.2
 	/*	Fixed instance overwrite problem
 	 *
 	 *  IMPORTANT: THE DEFAULT BUTTON VALUES NEED TO BE DEFINED
@@ -356,5 +356,7 @@ public class SRF_PID { //v1.1.1
 		} else if(!j.getRawButton(preset100Button)) {
 			letUpPreset100 = true;
 		}
+		
+		errorSum = 0;
 	}
 }
