@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class SRF_PID { //v1.1.2
+public class SRF_PID { //v1.1.3
 	/*	Fixed instance overwrite problem
 	 *
 	 *  IMPORTANT: THE DEFAULT BUTTON VALUES NEED TO BE DEFINED
@@ -204,12 +204,21 @@ public class SRF_PID { //v1.1.2
 	}
 	
 	//this sets the indices of the buttons that are being 
-	public void configButtons(int apply, int undo, int cycleGain, int cycleMode)
+	public void configButtons(int apply, int clear, int undo, int cycleGain, int cycleMode)
 	{
 		applyButton = apply;
 		undoButton = undo;
 		cycleGainButton = cycleGain;
 		cycleModeButton = cycleMode;
+		multClearButton = clear;
+	}
+
+	public void configPresetButtons(int inv, int preset10, int preset50, int preset100)
+	{
+		inversePresetButton = inv;
+		preset10Button = preset10;
+		preset50Button = preset50;
+		preset100Button = preset100;
 	}
 	
 	//This method should be called in every loop as it is what updates these methods
@@ -312,6 +321,7 @@ public class SRF_PID { //v1.1.2
 		
 		//apply - applies value right and then updateUndo is called (Dial + presets)
 		if(j.getRawButton(applyButton) && letUpApply) {
+			errorSum = 0;
 			isUpdated[currentGain] = true;
 			k[currentGain] *= mult[currentGain];
 			updateUndo(currentGain,k[currentGain]);
@@ -356,7 +366,5 @@ public class SRF_PID { //v1.1.2
 		} else if(!j.getRawButton(preset100Button)) {
 			letUpPreset100 = true;
 		}
-		
-		errorSum = 0;
 	}
 }
